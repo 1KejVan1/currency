@@ -1,15 +1,16 @@
-.container{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: auto;
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
 }
 
-.convertor_container{
-    display: flex;
-    flex-direction: column;
-    width: 400px;
-    height: 700px;
-    padding: 20px;
-    background-color: #ebf6fb;
+.convertor_container {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  height: 700px;
+  padding: 20px;
+  gap: 20px;
+  background-color: #ebf6fb;
 }

@@ -1,22 +1,30 @@
 import { Component } from "react";
-import styles from "./page.module.css";
-import { TextInput } from "../components/TextInputs/TextInput";
+
+import { AddButton } from "../components/Buttons/Add/AddButton";
 import { CurrencyBlock } from "../components/Currency Block/CurrencyBlock";
-import { Button } from "../components/Buttons/Default/Button";
-import { DeleteButton } from "../components/Buttons/Delete/DeleteButton";
+import styles from "./page.module.css";
 
-export class MainPage extends Component{
+export class MainPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { quantityOfCurrency: 0 };
+    this.addCurrency = this.addCurrency.bind(this);
+  }
 
-    constructor(props){
-        super(props);
+  addCurrency() {
+    this.setState({ quantityOfCurrency: this.state.quantityOfCurrency + 1 });
+  }
 
-    }
-
-    render(){
-        return <div className={styles.container}>
-            <div className={styles.convertor_container}>
-                <CurrencyBlock/>
-            </div>
+  render() {
+    return (
+      <div className={styles.container}>
+        <div className={styles.convertor_container}>
+          {Array.from({ length: this.state.quantityOfCurrency }).map(() => {
+            return <CurrencyBlock />;
+          })}
+          <AddButton onClickFunction={this.addCurrency} />
         </div>
-    }
+      </div>
+    );
+  }
 }
