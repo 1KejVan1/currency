@@ -8,9 +8,24 @@
 .convertor_container {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   width: 400px;
   height: 700px;
-  padding: 20px;
-  gap: 20px;
+  padding: 10px;
+  border-radius: 10px;
+  gap: 10px;
   background-color: #ebf6fb;
+}
+
+.currency_section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.add_button_section {
+  display: flex;
+  flex-direction: row;
 }

@@ -15,14 +15,31 @@ export class MainPage extends Component {
     this.setState({ quantityOfCurrency: this.state.quantityOfCurrency + 1 });
   }
 
+  // componentDidMount() {
+  //   fetch("https://api.nbrb.by/exrates/currencies/513")
+  //     .then((res) => {
+  //       if (res.ok) {
+  //         return res.json();
+  //       }
+  //     })
+  //     .then((res) => console.log(res))
+  //     .catch((e) => {
+  //       console.error(e);
+  //     });
+  // }
+
   render() {
     return (
       <div className={styles.container}>
         <div className={styles.convertor_container}>
-          {Array.from({ length: this.state.quantityOfCurrency }).map(() => {
-            return <CurrencyBlock />;
-          })}
-          <AddButton onClickFunction={this.addCurrency} />
+          <div className={styles.currency_section}>
+            {Array.from({ length: this.state.quantityOfCurrency }).map(() => {
+              return <CurrencyBlock />;
+            })}
+          </div>
+          <div className={styles.add_button_section}>
+            <AddButton onClickFunction={this.addCurrency} />
+          </div>
         </div>
       </div>
     );
