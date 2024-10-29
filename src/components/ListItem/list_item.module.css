@@ -5,7 +5,9 @@
   padding: 5px;
   height: 30px;
   font-size: 24px;
+  gap: 10px;
   border-bottom: 1px solid black;
+  background-color: white;
 }
 
 .list_item:last-child {
@@ -16,4 +18,12 @@
   background-color: #14509c;
   cursor: pointer;
   color: white;
+}
+
+.abbreviation {
+  font-size: large;
+}
+
+.cur_name {
+  font-size: 18px;
 }

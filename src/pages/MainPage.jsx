@@ -79,7 +79,7 @@ export class MainPage extends Component {
 
   render() {
     return (
-      <div className={styles.container} onClick={this.showHideCurrencyList}>
+      <div className={styles.container}>
         <div className={styles.convertor_container}>
           <div className={styles.currency_section}>
             {Array.from({ length: this.state.quantityOfCurrency }).map(() => {
@@ -88,7 +88,9 @@ export class MainPage extends Component {
           </div>
           <div className={styles.add_button_section}>
             <AddButton onClickFunction={this.showHideCurrencyList} />
-            {this.state.isShowingCurrencyList && <List />}
+            {this.state.isShowingCurrencyList && (
+              <List currencies={this.state.currencies} />
+            )}
           </div>
         </div>
       </div>

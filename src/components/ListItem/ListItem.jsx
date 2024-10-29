@@ -8,6 +8,11 @@ export class ListItem extends Component {
   }
 
   render() {
-    return <div className={styles.list_item}>4556</div>;
+    return (
+      <div className={styles.list_item}>
+        <div className={styles.abbreviation}>{this.props.Abbreviation}</div>
+        <div className={styles.cur_name}>{this.props.CurName}</div>
+      </div>
+    );
   }
 }
