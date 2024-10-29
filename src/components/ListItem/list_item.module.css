@@ -1,0 +1,19 @@
+.list_item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 5px;
+  height: 30px;
+  font-size: 24px;
+  border-bottom: 1px solid black;
+}
+
+.list_item:last-child {
+  border-bottom: none;
+}
+
+.list_item:hover {
+  background-color: #14509c;
+  cursor: pointer;
+  color: white;
+}
