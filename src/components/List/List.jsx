@@ -9,19 +9,26 @@ export class List extends Component {
   constructor(props) {
     super();
     this.state = { isOverflown: false };
+    this.checkOverflown = this.checkOverflown.bind(this);
   }
 
-  isOverflown(id) {
-    const element = document.getElementById(id);
+  checkOverflown() {
+    const element = document.getElementById("list");
 
-    return (
-      element.getBoundingClientRect().bottom >
-      document.documentElement.clientHeight
-    );
+    this.setState({
+      isOverflown:
+        element.getBoundingClientRect().bottom >
+        document.documentElement.clientHeight,
+    });
   }
 
   componentDidMount() {
-    this.setState({ isOverflown: this.isOverflown("list") });
+    this.checkOverflown();
+    window.addEventListener("resize", this.checkOverflown);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.checkOverflown);
   }
 
   render() {

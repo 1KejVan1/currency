@@ -1,19 +1,27 @@
 import { Component } from "react";
-import styles from "./block.module.css";
-import { TextInput } from "../TextInputs/TextInput";
+
 import { DeleteButton } from "../Buttons/Delete/DeleteButton";
+import { TextInput } from "../TextInputs/TextInput";
+import styles from "./block.module.css";
 
-export class CurrencyBlock extends Component{
+export class CurrencyBlock extends Component {
+  constructor(props) {
+    super();
+  }
 
-    constructor(props){
-        super(props);
-    }
-
-    render(){
-       return  <div className={styles.block}>
-       <div>USD</div>
-       <TextInput/>
-       <DeleteButton/>
-   </div>
-    }
+  render() {
+    return (
+      <div className={styles.block}>
+        <div>{this.props.abbreviation}</div>
+        {this.props.isCanDelete ? (
+          <TextInput />
+        ) : (
+          <div className={styles.textField_without_delete_button}>
+            <TextInput />
+          </div>
+        )}
+        {this.props.isCanDelete && <DeleteButton />}
+      </div>
+    );
+  }
 }

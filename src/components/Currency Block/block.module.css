@@ -1,8 +1,11 @@
-.block{
-    display: flex;
-    /* justify-content: center; */
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    gap: 10px;
+.block {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.textField_without_delete_button {
+  width: 80%;
 }

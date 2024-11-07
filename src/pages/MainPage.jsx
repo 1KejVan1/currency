@@ -10,10 +10,12 @@ export class MainPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      quantityOfCurrency: 0,
+      quantityOfCurrency: 5,
       isShowingCurrencyList: false,
       currencies: [],
+      currenciesForList: [],
       isNameFetched: false,
+      isArrayFiltred: false,
     };
     this.addCurrency = this.addCurrency.bind(this);
     this.showHideCurrencyList = this.showHideCurrencyList.bind(this);
@@ -33,8 +35,6 @@ export class MainPage extends Component {
       this.setState({ isShowingCurrencyList: false });
     }
   }
-
-  // запросы сделать
 
   async fetchName(id) {
     const obj = await fetch(`https://api.nbrb.by/exrates/currencies/${id}`);
@@ -68,13 +68,66 @@ export class MainPage extends Component {
           );
         }
 
-        this.setState({ currencies: [...currencies] });
+        this.setState({ currenciesForList: [...currencies] });
       })
       .catch((e) => {
         console.error(e);
       });
+  }
 
-    console.log(currencies);
+  componentDidUpdate(_, prevState) {
+    if (
+      this.state.currenciesForList.length != 0 &&
+      prevState.currenciesForList.length == 0 &&
+      this.state.isArrayFiltred == false
+    ) {
+      const defaultCurrencies = [new Currency(0, "BLR", "Белорусский рубль")];
+      const currencies = [...this.state.currenciesForList];
+      currencies.map((currency) => {
+        if (
+          currency.abbreviation === "USD" ||
+          currency.abbreviation === "EUR" ||
+          currency.abbreviation === "RUB"
+        ) {
+          defaultCurrencies.push(currency);
+        }
+      });
+
+      this.setState({
+        currencies: [...defaultCurrencies],
+        isArrayFiltred: true,
+        currenciesForList: [...defaultCurrencies],
+      });
+    }
+    // if (prevState.isArrayFiltred !== this.state.isArrayFiltred) {
+    //   const currencies = [...this.state.currenciesForList];
+    //   const filteredArray = currencies.filter((currency) => {
+    //     if (
+    //       currency.abbreviation !== "USD" &&
+    //       currency.abbreviation !== "EUR" &&
+    //       currency.abbreviation !== "RUB"
+    //     ) {
+    //       return currency;
+    //     }
+    //   });
+
+    //   console.log(filteredArray);
+
+    //   this.setState({ currenciesForList: filteredArray });
+    // }
+  }
+
+  //---- РАЗОБРАТЬСЯ СО ВТОРЫМ МАССИВОМ
+
+  isCanDelete(abbreviation) {
+    if (
+      abbreviation == "BLR" ||
+      abbreviation == "USD" ||
+      abbreviation == "EUR" ||
+      abbreviation == "RUB"
+    ) {
+      return false;
+    } else return true;
   }
 
   render() {
@@ -82,14 +135,21 @@ export class MainPage extends Component {
       <div className={styles.container}>
         <div className={styles.convertor_container}>
           <div className={styles.currency_section}>
-            {Array.from({ length: this.state.quantityOfCurrency }).map(() => {
-              return <CurrencyBlock />;
+            {this.state.currencies.map((currency) => {
+              return (
+                <CurrencyBlock
+                  key={currency.abbreviation}
+                  abbreviation={currency.abbreviation}
+                  value={currency.value}
+                  isCanDelete={this.isCanDelete(currency.abbreviation)}
+                />
+              );
             })}
           </div>
           <div className={styles.add_button_section}>
             <AddButton onClickFunction={this.showHideCurrencyList} />
             {this.state.isShowingCurrencyList && (
-              <List currencies={this.state.currencies} />
+              <List currencies={this.state.currenciesForList} />
             )}
           </div>
         </div>
