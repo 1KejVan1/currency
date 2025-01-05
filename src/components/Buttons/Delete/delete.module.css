@@ -1,15 +1,15 @@
-.delete_button{
-    width: 15px;
-    height: 15px;
-    padding: 0;
-    border: none;
+.delete_button {
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: none;
 }
 
-.delete_button:hover{
-    cursor: pointer;
+.delete_button:hover {
+  cursor: pointer;
 }
 
-.img{
-    width: inherit;
-    aspect-ratio: 1 /1 ;
+.img {
+  width: inherit;
+  aspect-ratio: 1 /1;
 }

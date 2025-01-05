@@ -3,6 +3,7 @@ import { Component } from "react";
 import { AddButton } from "../components/Buttons/Add/AddButton";
 import { CurrencyBlock } from "../components/Currency Block/CurrencyBlock";
 import { List } from "../components/List/List";
+import { Abbreviations } from "../enums/Abbreviations";
 import { Currency } from "../model/Currency";
 import styles from "./page.module.css";
 
@@ -10,20 +11,66 @@ export class MainPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      quantityOfCurrency: 5,
       isShowingCurrencyList: false,
-      currencies: [],
-      currenciesForList: [],
+      selectedCurrencies: [],
+      listCurrencies: [],
+      allCurrencies: [],
       isNameFetched: false,
       isArrayFiltred: false,
     };
     this.addCurrency = this.addCurrency.bind(this);
+    this.addCurrencyToList = this.addCurrencyToList.bind(this);
+    this.sortCurrencies = this.sortCurrencies.bind(this);
+    this.deleteCurrency = this.deleteCurrency.bind(this);
+    this.deleteCurrencyFromList = this.deleteCurrencyFromList.bind(this);
     this.showHideCurrencyList = this.showHideCurrencyList.bind(this);
     this.checkIsListShowing = this.checkIsListShowing.bind(this);
   }
 
-  addCurrency() {
-    this.setState({ quantityOfCurrency: this.state.quantityOfCurrency + 1 });
+  addCurrency(currencyAbbr = "") {
+    const currency = [...this.state.allCurrencies].find(
+      (curr) => curr.abbreviation === currencyAbbr,
+    );
+
+    this.setState({
+      selectedCurrencies: [...this.state.selectedCurrencies, currency],
+    });
+
+    this.showHideCurrencyList();
+    this.deleteCurrencyFromList(currencyAbbr);
+  }
+
+  deleteCurrencyFromList(currencyAbbr) {
+    const currencies = [...this.state.listCurrencies].filter(
+      (curr) => curr.abbreviation !== currencyAbbr,
+    );
+
+    this.setState({ listCurrencies: [...currencies] });
+  }
+
+  deleteCurrency(currencyAbbr = "") {
+    const currencies = [...this.state.selectedCurrencies].filter(
+      (curr) => curr.abbreviation !== currencyAbbr,
+    );
+
+    this.setState({
+      selectedCurrencies: [...currencies],
+    });
+
+    this.addCurrencyToList(currencyAbbr);
+  }
+
+  addCurrencyToList(currencyAbbr) {
+    const currency = [...this.state.allCurrencies].find(
+      (curr) => curr.abbreviation === currencyAbbr,
+    );
+
+    this.setState({
+      listCurrencies: this.sortCurrencies([
+        ...this.state.listCurrencies,
+        currency,
+      ]),
+    });
   }
 
   showHideCurrencyList() {
@@ -34,6 +81,10 @@ export class MainPage extends Component {
     if (this.state.isShowingCurrencyList) {
       this.setState({ isShowingCurrencyList: false });
     }
+  }
+
+  sortCurrencies(currencies = []) {
+    return currencies.sort((a, b) => a.cur_name.localeCompare(b.cur_name));
   }
 
   async fetchName(id) {
@@ -68,7 +119,12 @@ export class MainPage extends Component {
           );
         }
 
-        this.setState({ currenciesForList: [...currencies] });
+        this.setState({
+          allCurrencies: [...currencies],
+          listCurrencies: currencies.filter((curr) =>
+            this.isCanDelete(curr.abbreviation),
+          ),
+        });
       })
       .catch((e) => {
         console.error(e);
@@ -77,12 +133,12 @@ export class MainPage extends Component {
 
   componentDidUpdate(_, prevState) {
     if (
-      this.state.currenciesForList.length != 0 &&
-      prevState.currenciesForList.length == 0 &&
+      this.state.allCurrencies.length != 0 &&
+      prevState.allCurrencies.length == 0 &&
       this.state.isArrayFiltred == false
     ) {
       const defaultCurrencies = [new Currency(0, "BLR", "Белорусский рубль")];
-      const currencies = [...this.state.currenciesForList];
+      const currencies = [...this.state.allCurrencies];
       currencies.map((currency) => {
         if (
           currency.abbreviation === "USD" ||
@@ -94,40 +150,20 @@ export class MainPage extends Component {
       });
 
       this.setState({
-        currencies: [...defaultCurrencies],
+        selectedCurrencies: [...defaultCurrencies],
         isArrayFiltred: true,
-        currenciesForList: [...defaultCurrencies],
+        allCurrencies: [...defaultCurrencies],
       });
     }
-    // if (prevState.isArrayFiltred !== this.state.isArrayFiltred) {
-    //   const currencies = [...this.state.currenciesForList];
-    //   const filteredArray = currencies.filter((currency) => {
-    //     if (
-    //       currency.abbreviation !== "USD" &&
-    //       currency.abbreviation !== "EUR" &&
-    //       currency.abbreviation !== "RUB"
-    //     ) {
-    //       return currency;
-    //     }
-    //   });
-
-    //   console.log(filteredArray);
-
-    //   this.setState({ currenciesForList: filteredArray });
-    // }
   }
 
-  //---- РАЗОБРАТЬСЯ СО ВТОРЫМ МАССИВОМ
-
   isCanDelete(abbreviation) {
-    if (
-      abbreviation == "BLR" ||
-      abbreviation == "USD" ||
-      abbreviation == "EUR" ||
-      abbreviation == "RUB"
-    ) {
-      return false;
-    } else return true;
+    return (
+      abbreviation != Abbreviations.BLR &&
+      abbreviation != Abbreviations.USD &&
+      abbreviation != Abbreviations.RUB &&
+      abbreviation != Abbreviations.EUR
+    );
   }
 
   render() {
@@ -135,13 +171,14 @@ export class MainPage extends Component {
       <div className={styles.container}>
         <div className={styles.convertor_container}>
           <div className={styles.currency_section}>
-            {this.state.currencies.map((currency) => {
+            {this.state.selectedCurrencies.map((currency) => {
               return (
                 <CurrencyBlock
                   key={currency.abbreviation}
                   abbreviation={currency.abbreviation}
                   value={currency.value}
                   isCanDelete={this.isCanDelete(currency.abbreviation)}
+                  deleteFunction={this.deleteCurrency}
                 />
               );
             })}
@@ -149,7 +186,11 @@ export class MainPage extends Component {
           <div className={styles.add_button_section}>
             <AddButton onClickFunction={this.showHideCurrencyList} />
             {this.state.isShowingCurrencyList && (
-              <List currencies={this.state.currenciesForList} />
+              <List
+                currencies={this.state.listCurrencies}
+                selectItem={this.addCurrency}
+                hideList={this.showHideCurrencyList}
+              />
             )}
           </div>
         </div>

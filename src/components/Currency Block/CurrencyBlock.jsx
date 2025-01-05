@@ -7,6 +7,11 @@ import styles from "./block.module.css";
 export class CurrencyBlock extends Component {
   constructor(props) {
     super();
+    this.deleteCurrency = this.deleteCurrency.bind(this);
+  }
+
+  deleteCurrency() {
+    this.props.deleteFunction(this.props.abbreviation);
   }
 
   render() {
@@ -16,11 +21,15 @@ export class CurrencyBlock extends Component {
         {this.props.isCanDelete ? (
           <TextInput />
         ) : (
-          <div className={styles.textField_without_delete_button}>
+          <div className={styles.input_without_delete_button}>
             <TextInput />
           </div>
         )}
-        {this.props.isCanDelete && <DeleteButton />}
+        {this.props.isCanDelete && (
+          <div className={styles.delete_button_container}>
+            <DeleteButton onClickFunction={this.deleteCurrency} />
+          </div>
+        )}
       </div>
     );
   }

@@ -46,6 +46,7 @@ export class List extends Component {
               key={item.abbreviation}
               Abbreviation={item.abbreviation}
               CurName={item.cur_name}
+              onClickFunction={this.props.selectItem}
             />
           );
         })}
@@ -54,4 +55,8 @@ export class List extends Component {
   }
 }
 
-List.defaultProps = { currencies: [] };
+List.defaultProps = {
+  currencies: [],
+  selectItem: Function.prototype,
+  hideList: Function.prototype,
+};

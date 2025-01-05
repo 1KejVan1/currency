@@ -1,11 +1,15 @@
 .block {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 10% 80% 5%;
   align-items: center;
-  width: 100%;
   gap: 10px;
 }
 
-.textField_without_delete_button {
-  width: 80%;
+.input_without_delete_button {
+  display: contents;
+}
+
+.delete_button_container {
+  display: flex;
+  align-self: center;
 }
