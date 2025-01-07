@@ -1,23 +1,23 @@
-.add_button{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    background-color: transparent;
-    border: none;
-    width: fit-content;
+.add_button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  background-color: transparent;
+  border: none;
+  width: fit-content;
 }
 
-.add_button:hover{
-    cursor: pointer;
+.add_button:hover {
+  cursor: pointer;
 }
 
-.icon{
-    width: 25px;
-    aspect-ratio: 1/1;
+.icon {
+  width: 25px;
+  aspect-ratio: 1/1;
 }
 
-.title{
-    color: blue;
-    font-size: large;
+.title {
+  color: blue;
+  font-size: large;
 }

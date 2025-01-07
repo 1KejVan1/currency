@@ -25,6 +25,7 @@ export class MainPage extends Component {
     this.deleteCurrencyFromList = this.deleteCurrencyFromList.bind(this);
     this.showHideCurrencyList = this.showHideCurrencyList.bind(this);
     this.checkIsListShowing = this.checkIsListShowing.bind(this);
+    this.trackingClick = this.trackingClick.bind(this);
   }
 
   addCurrency(currencyAbbr = "") {
@@ -74,6 +75,12 @@ export class MainPage extends Component {
   }
 
   showHideCurrencyList() {
+    if (this.state.isShowingCurrencyList) {
+      window.removeEventListener("click", this.trackingClick);
+    } else {
+      window.addEventListener("click", this.trackingClick);
+    }
+
     this.setState({ isShowingCurrencyList: !this.state.isShowingCurrencyList });
   }
 
@@ -84,7 +91,9 @@ export class MainPage extends Component {
   }
 
   sortCurrencies(currencies = []) {
-    return currencies.sort((a, b) => a.cur_name.localeCompare(b.cur_name));
+    return currencies.sort((a, b) =>
+      a.abbreviation.localeCompare(b.abbreviation),
+    );
   }
 
   async fetchName(id) {
@@ -96,6 +105,13 @@ export class MainPage extends Component {
     }
 
     return "";
+  }
+
+  trackingClick(e) {
+    const className = e.srcElement.parentElement.className;
+    if (!className.includes("add_button") && this.state.isShowingCurrencyList) {
+      this.showHideCurrencyList();
+    }
   }
 
   componentDidMount() {
@@ -120,10 +136,12 @@ export class MainPage extends Component {
         }
 
         this.setState({
-          allCurrencies: [...currencies],
-          listCurrencies: currencies.filter((curr) =>
-            this.isCanDelete(curr.abbreviation),
-          ),
+          allCurrencies: [...this.sortCurrencies(currencies)],
+          listCurrencies: [
+            ...this.sortCurrencies(
+              currencies.filter((curr) => this.isCanDelete(curr.abbreviation)),
+            ),
+          ],
         });
       })
       .catch((e) => {
@@ -164,6 +182,10 @@ export class MainPage extends Component {
       abbreviation != Abbreviations.RUB &&
       abbreviation != Abbreviations.EUR
     );
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("click", this.trackingClick);
   }
 
   render() {
