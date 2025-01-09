@@ -32,3 +32,13 @@
   top: 0px;
   left: 0px;
 }
+
+@media (max-width: 340px) {
+  .add_button_section {
+    justify-content: center;
+  }
+
+  .convertor_container {
+    align-items: center;
+  }
+}
