@@ -1,6 +1,6 @@
 export const Abbreviations = {
   USD: "USD",
-  BLR: "BLR",
+  BYN: "BYN",
   EUR: "EUR",
   RUB: "RUB",
 };
