@@ -5,12 +5,13 @@ import styles from "./input.module.css";
 export class TextInput extends Component {
   constructor(props) {
     super(props);
-    this.state = { value: this.props.value, isFocus: false };
+    this.state = { value: this.props.value };
     this.handleOnChange = this.handleOnChange.bind(this);
   }
 
   handleOnChange(e) {
     this.setState({ value: e.target.value });
+    this.props.onChangeFunction(e.target.value);
   }
 
   render() {

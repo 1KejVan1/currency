@@ -22,8 +22,6 @@ async function fetchName(id) {
     const resJson = await obj.json();
     return resJson.Cur_Name;
   }
-
-  return "";
 }
 
 async function fetchCurrencies() {
@@ -34,8 +32,6 @@ async function fetchCurrencies() {
 
     return currencies;
   }
-
-  return [];
 }
 
 export { isCanDelete, sortCurrencies, fetchName, fetchCurrencies };

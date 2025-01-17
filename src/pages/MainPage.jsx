@@ -21,6 +21,7 @@ export class MainPage extends Component {
       selectedCurrencies: [],
       listCurrencies: [],
       allCurrencies: [],
+      fixedAllCurrencies: [],
       isArrayFiltred: false,
     };
     this.addCurrency = this.addCurrency.bind(this);
@@ -34,7 +35,7 @@ export class MainPage extends Component {
   }
 
   addCurrency(currencyAbbr = "") {
-    const currency = [...this.state.allCurrencies].find(
+    const currency = [...this.state.fixedAllCurrencies].find(
       (curr) => curr.abbreviation === currencyAbbr,
     );
 
@@ -69,7 +70,7 @@ export class MainPage extends Component {
   }
 
   addCurrencyToList(currencyAbbr) {
-    const currency = [...this.state.allCurrencies].find(
+    const currency = [...this.state.fixedAllCurrencies].find(
       (curr) => curr.abbreviation === currencyAbbr,
     );
 
@@ -102,20 +103,7 @@ export class MainPage extends Component {
     }
   }
 
-  // shouldComponentUpdate(_, nextState) {
-  //   for (let i = 0; i < nextState.allCurrencies.length; i++) {
-  //     const obj = nextState.allCurrencies[i];
-
-  //     for (const key of Object.keys(obj)) {
-  //       console.log(key, obj[key]);
-  //     }
-  //   }
-
-  //   return true;
-  // }
-
   async componentDidMount() {
-    if (this.state.allCurrencies.length) return;
     const currencies = [];
     const fetchedCurrencies = await fetchCurrencies();
 
@@ -141,32 +129,35 @@ export class MainPage extends Component {
         listCurrencies: sortedCurrencies.filter((curr) =>
           isCanDelete(curr.abbreviation),
         ),
+        isCurrenciesFetched: true,
       });
     }
   }
 
   convertToSelectedCurrency(selectedCurAbb, value) {
-    const currencies = [...this.state.allCurrencies];
-    const selectedRate = currencies.find(
-      (curr) => curr.abbreviation === selectedCurAbb,
-    ).rate;
+    const currencies = new Array(...this.state.fixedAllCurrencies);
+    const selectedRate =
+      selectedCurAbb === Abbreviations.BYN
+        ? 1
+        : currencies.find((curr) => curr.abbreviation === selectedCurAbb).rate;
+
     const bynScale = value * selectedRate;
 
-    console.log(currencies);
+    currencies.forEach((curr) => {
+      if (curr.abbreviation === Abbreviations.BYN) {
+        curr.scale = bynScale;
+      } else {
+        curr.scale = Math.trunc((bynScale / curr.rate) * 100) / 100;
+      }
+    });
 
-    currencies.forEach(
-      (curr) => (curr.scale = Math.trunc((bynScale / curr.rate) * 100) / 100),
-    );
-
-    this.setState({ allCurrencies: currencies });
+    this.setState({
+      fixedAllCurrencies: currencies,
+    });
   }
 
   componentDidUpdate(_, prevState) {
-    if (
-      this.state.allCurrencies.length != 0 &&
-      prevState.allCurrencies.length == 0 &&
-      this.state.isArrayFiltred == false
-    ) {
+    if (this.state.isCurrenciesFetched && !prevState.isCurrenciesFetched) {
       const currencies = [...this.state.allCurrencies];
 
       const bynRateToUSD = currencies.find(
@@ -188,63 +179,19 @@ export class MainPage extends Component {
           currency.abbreviation === Abbreviations.EUR ||
           currency.abbreviation === Abbreviations.RUB
         ) {
-          // currency.scale =
-          //   Math.trunc((bynRateToUSD / currency.rate) * 100) / 100;
-
           defaultCurrencies.push(currency);
         }
+
+        currency.scale = Math.trunc((bynRateToUSD / currency.rate) * 100) / 100;
       });
+
+      const sortedCurrencies = sortCurrencies([...currencies, bynCurrency]);
 
       this.setState({
         selectedCurrencies: defaultCurrencies,
         isArrayFiltred: true,
+        fixedAllCurrencies: sortedCurrencies,
       });
-
-      return;
-    }
-    if (
-      this.state.selectedCurrencies.length &&
-      prevState.selectedCurrencies.length == 0
-    ) {
-      const currencies = [...this.state.allCurrencies];
-
-      const bynRateToUSD = currencies.find(
-        (curr) => curr.abbreviation === Abbreviations.USD,
-      ).rate;
-
-      currencies.forEach((currency) => {
-        currency.scale = Math.trunc((bynRateToUSD / currency.rate) * 100) / 100;
-      });
-
-      const test = [];
-
-      for (let i = 0; i < currencies.length; i++) {
-        const obj = new Currency(
-          currencies[i].id,
-          currencies[i].abbreviation,
-          currencies[i].name,
-          currencies[i].scale,
-          currencies[i].rate,
-        );
-        test.push(obj);
-      }
-
-      test.push(
-        this.state.selectedCurrencies.find(
-          (curr) => curr.abbreviation === Abbreviations.BYN,
-        ),
-      );
-
-      this.setState({ allCurrencies: [], listCurrencies: [] });
-
-      // this.setState({
-      //   allCurrencies: [
-      //     ...currencies,
-      //     this.state.selectedCurrencies.find(
-      //       (curr) => curr.abbreviation === Abbreviations.BYN,
-      //     ),
-      //   ],
-      // });
     }
   }
 
@@ -253,7 +200,6 @@ export class MainPage extends Component {
   }
 
   render() {
-    // console.log(this.state.allCurrencies);
     return (
       <div className={styles.container}>
         <div className={styles.convertor_container}>
@@ -265,6 +211,7 @@ export class MainPage extends Component {
                   abbreviation={currency.abbreviation}
                   value={currency.scale}
                   isCanDelete={isCanDelete(currency.abbreviation)}
+                  changeValue={this.convertToSelectedCurrency}
                   deleteFunction={this.deleteCurrency}
                 />
               );
