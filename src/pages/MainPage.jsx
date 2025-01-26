@@ -106,6 +106,53 @@ export class MainPage extends Component {
     }
   }
 
+  convertToSelectedCurrency(selectedCurAbb, value) {
+    const currencies = [...this.state.fixedAllCurrencies];
+    const selectedCurr = [...this.state.selectedCurrencies];
+    const selectedRate =
+      selectedCurAbb === Abbreviations.BYN
+        ? 1
+        : currencies.find((curr) => curr.abbreviation === selectedCurAbb).rate;
+
+    const bynScale = Math.trunc(value * selectedRate * 10000) / 10000;
+
+    const convertedCurrencies = currencies.map((curr) => {
+      const obj = Object.create(Currency);
+      obj.id = curr.id;
+      obj.abbreviation = curr.abbreviation;
+      obj.name = curr.name;
+      obj.rate = curr.rate;
+
+      if (curr.abbreviation === Abbreviations.BYN) {
+        obj.scale = bynScale;
+      } else if (selectedCurAbb !== curr.abbreviation) {
+        obj.scale = Math.trunc((bynScale / curr.rate) * 10000) / 10000;
+      } else {
+        obj.scale = value;
+      }
+
+      return { ...obj };
+    });
+
+    const selCur = selectedCurr.map((curr) => {
+      const obj = Object.create(Currency);
+      obj.id = curr.id;
+      obj.abbreviation = curr.abbreviation;
+      obj.name = curr.name;
+      obj.scale = convertedCurrencies.find(
+        (item) => item.abbreviation === obj.abbreviation,
+      ).scale;
+      obj.rate = curr.rate;
+
+      return { ...obj };
+    });
+
+    this.setState({
+      fixedAllCurrencies: [...convertedCurrencies],
+      selectedCurrencies: [...selCur],
+    });
+  }
+
   async componentDidMount() {
     const currencies = [];
     const fetchedCurrencies = await fetchCurrencies();
@@ -145,60 +192,15 @@ export class MainPage extends Component {
     });
   }
 
-  convertToSelectedCurrency(selectedCurAbb, value) {
-    const currencies = [...this.state.fixedAllCurrencies];
-    const selectedCurr = [...this.state.selectedCurrencies];
-    const selectedRate =
-      selectedCurAbb === Abbreviations.BYN
-        ? 1
-        : currencies.find((curr) => curr.abbreviation === selectedCurAbb).rate;
-
-    const bynScale = Math.trunc(value * selectedRate * 100) / 100;
-
-    const convertedCurrencies = currencies.map((curr) => {
-      const obj = Object.create(Currency);
-      obj.id = curr.id;
-      obj.abbreviation = curr.abbreviation;
-      obj.name = curr.name;
-      obj.rate = curr.rate;
-
-      if (curr.abbreviation === Abbreviations.BYN) {
-        obj.scale = bynScale;
-      } else if (selectedCurAbb !== curr.abbreviation) {
-        obj.scale = Math.trunc((bynScale / curr.rate) * 100) / 100;
-      } else {
-        obj.scale = value;
-      }
-
-      return { ...obj };
-    });
-
-    const selCur = selectedCurr.map((curr) => {
-      const obj = Object.create(Currency);
-      obj.id = curr.id;
-      obj.abbreviation = curr.abbreviation;
-      obj.name = curr.name;
-      obj.scale = convertedCurrencies.find(
-        (item) => item.abbreviation === obj.abbreviation,
-      ).scale;
-      obj.rate = curr.rate;
-
-      return { ...obj };
-    });
-
-    this.setState({
-      fixedAllCurrencies: [...convertedCurrencies],
-      selectedCurrencies: [...selCur],
-    });
-  }
-
   componentDidUpdate(_, prevState) {
     if (this.state.isCurrenciesFetched && !prevState.isCurrenciesFetched) {
       const currencies = [...this.state.allCurrencies];
 
-      const bynRateToUSD = currencies.find(
-        (curr) => curr.abbreviation === Abbreviations.USD,
-      ).rate;
+      const bynRateToUSD =
+        Math.trunc(
+          currencies.find((curr) => curr.abbreviation === Abbreviations.USD)
+            .rate * 10000,
+        ) / 10000;
 
       const bynCurrency = Object.create(Currency);
       bynCurrency.id = 0;
@@ -209,7 +211,8 @@ export class MainPage extends Component {
       const defaultCurrencies = [{ ...bynCurrency }];
 
       const test = currencies.map((currency) => {
-        const scale = Math.trunc((bynRateToUSD / currency.rate) * 100) / 100;
+        const scale =
+          Math.trunc((bynRateToUSD / currency.rate) * 10000) / 10000;
 
         if (
           currency.abbreviation === Abbreviations.USD ||
@@ -255,7 +258,6 @@ export class MainPage extends Component {
             })}
           </div>
           <div className={styles.add_button_section}>
-            <AddButton onClickFunction={this.showHideCurrencyList} />
             {this.state.isShowingCurrencyList && (
               <List
                 currencies={this.state.listCurrencies}
@@ -263,6 +265,7 @@ export class MainPage extends Component {
                 hideList={this.showHideCurrencyList}
               />
             )}
+            <AddButton onClickFunction={this.showHideCurrencyList} />
           </div>
         </div>
       </div>

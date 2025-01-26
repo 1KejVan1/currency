@@ -34,4 +34,22 @@ async function fetchCurrencies() {
   }
 }
 
-export { isCanDelete, sortCurrencies, fetchName, fetchCurrencies };
+function identifyTheMobileDevice() {
+  const devices = ["Android", "IPhone", "IPad"];
+
+  for (const device of devices) {
+    if (navigator.userAgent.includes(device)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export {
+  isCanDelete,
+  sortCurrencies,
+  fetchName,
+  fetchCurrencies,
+  identifyTheMobileDevice,
+};

@@ -20,5 +20,37 @@
   border-radius: 5px;
   box-shadow: 0px 0px 5px black;
   left: 0px;
-  top: -250px;
+  top: -220px;
+}
+
+.list_mobile {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: auto;
+  width: 100%;
+  overflow-y: auto;
+}
+
+.header_for_list_mobile {
+  display: grid;
+  grid-template-columns: 10% 80% 10%;
+  align-items: center;
+  background-color: white;
+  gap: 20px;
+  height: 40px;
+  border-bottom: 1px solid black;
+}
+
+.header_for_list_mobile_icon {
+  grid-column: 1;
+}
+
+.header_for_list_mobile_title {
+  display: flex;
+  justify-content: center;
+  grid-column: 2;
+  font-size: 28px;
 }
