@@ -1,11 +1,12 @@
-import { Component } from "react";
+import { Component, createRef } from "react";
 
 import styles from "./input.module.css";
 
 export class TextInput extends Component {
+  refLink = createRef(null);
+
   constructor(props) {
     super(props);
-    this.state = { value: this.props.value };
     this.handleOnChange = this.handleOnChange.bind(this);
   }
 
@@ -14,13 +15,21 @@ export class TextInput extends Component {
     this.props.onChangeFunction(e.target.value);
   }
 
+  componentDidMount() {
+    this.refLink.current.value = this.props.value;
+  }
+
+  componentDidUpdate() {
+    this.refLink.current.value = this.props.value;
+  }
+
   render() {
     return (
       <input
+        ref={this.refLink}
         className={styles.input}
         type="text"
         onChange={this.handleOnChange}
-        value={this.state.value}
       />
     );
   }

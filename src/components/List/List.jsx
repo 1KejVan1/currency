@@ -7,7 +7,7 @@ import styles from "./list.module.css";
 
 export class List extends Component {
   constructor(props) {
-    super();
+    super(props);
     this.state = { isOverflown: false };
     this.checkOverflown = this.checkOverflown.bind(this);
   }
@@ -45,7 +45,7 @@ export class List extends Component {
             <ListItem
               key={item.abbreviation}
               Abbreviation={item.abbreviation}
-              CurName={item.cur_name}
+              CurName={item.name}
               onClickFunction={this.props.selectItem}
             />
           );

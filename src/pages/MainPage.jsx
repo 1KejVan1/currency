@@ -4,7 +4,7 @@ import { AddButton } from "../components/Buttons/Add/AddButton";
 import { CurrencyBlock } from "../components/Currency Block/CurrencyBlock";
 import { List } from "../components/List/List";
 import { Abbreviations } from "../enums/Abbreviations";
-import { Currency } from "../model/Currency";
+import { Currency, CurrencyForList } from "../model/Currency";
 import {
   fetchCurrencies,
   fetchName,
@@ -42,7 +42,7 @@ export class MainPage extends Component {
     if (!currency) return;
 
     this.setState({
-      selectedCurrencies: [...this.state.selectedCurrencies, currency],
+      selectedCurrencies: [...this.state.selectedCurrencies, { ...currency }],
     });
 
     this.showHideCurrencyList();
@@ -75,7 +75,10 @@ export class MainPage extends Component {
     );
 
     this.setState({
-      listCurrencies: sortCurrencies([...this.state.listCurrencies, currency]),
+      listCurrencies: sortCurrencies([
+        ...this.state.listCurrencies,
+        { ...currency },
+      ]),
     });
   }
 
@@ -110,49 +113,82 @@ export class MainPage extends Component {
     if (fetchedCurrencies.length) {
       for (let i = 0; i < fetchedCurrencies.length; i++) {
         const name = await fetchName(fetchedCurrencies[i].Cur_ID);
-        currencies.push(
-          new Currency(
-            fetchedCurrencies[i].Cur_ID,
-            fetchedCurrencies[i].Cur_Abbreviation,
-            name,
-            1,
-            fetchedCurrencies[i].Cur_OfficialRate /
-              fetchedCurrencies[i].Cur_Scale,
-          ),
-        );
+        const currency = Object.create(Currency);
+        currency.id = fetchedCurrencies[i].Cur_ID;
+        currency.name = name;
+        currency.abbreviation = fetchedCurrencies[i].Cur_Abbreviation;
+        currency.scale = 1;
+        currency.rate =
+          fetchedCurrencies[i].Cur_OfficialRate /
+          fetchedCurrencies[i].Cur_Scale;
+
+        currencies.push({ ...currency });
       }
-
-      const sortedCurrencies = sortCurrencies(currencies);
-
-      this.setState({
-        allCurrencies: sortedCurrencies,
-        listCurrencies: sortedCurrencies.filter((curr) =>
-          isCanDelete(curr.abbreviation),
-        ),
-        isCurrenciesFetched: true,
-      });
     }
+
+    const sortedCurrencies = sortCurrencies(currencies);
+    const currenciesForList = sortedCurrencies.filter((curr) => {
+      if (isCanDelete(curr.abbreviation)) {
+        const obj = Object.create(CurrencyForList);
+        obj.id = curr.id;
+        obj.name = curr.name;
+        obj.abbreviation = curr.abbreviation;
+
+        return { ...obj };
+      }
+    });
+
+    this.setState({
+      allCurrencies: sortedCurrencies,
+      listCurrencies: currenciesForList,
+      isCurrenciesFetched: true,
+    });
   }
 
   convertToSelectedCurrency(selectedCurAbb, value) {
-    const currencies = new Array(...this.state.fixedAllCurrencies);
+    const currencies = [...this.state.fixedAllCurrencies];
+    const selectedCurr = [...this.state.selectedCurrencies];
     const selectedRate =
       selectedCurAbb === Abbreviations.BYN
         ? 1
         : currencies.find((curr) => curr.abbreviation === selectedCurAbb).rate;
 
-    const bynScale = value * selectedRate;
+    const bynScale = Math.trunc(value * selectedRate * 100) / 100;
 
-    currencies.forEach((curr) => {
+    const convertedCurrencies = currencies.map((curr) => {
+      const obj = Object.create(Currency);
+      obj.id = curr.id;
+      obj.abbreviation = curr.abbreviation;
+      obj.name = curr.name;
+      obj.rate = curr.rate;
+
       if (curr.abbreviation === Abbreviations.BYN) {
-        curr.scale = bynScale;
+        obj.scale = bynScale;
+      } else if (selectedCurAbb !== curr.abbreviation) {
+        obj.scale = Math.trunc((bynScale / curr.rate) * 100) / 100;
       } else {
-        curr.scale = Math.trunc((bynScale / curr.rate) * 100) / 100;
+        obj.scale = value;
       }
+
+      return { ...obj };
+    });
+
+    const selCur = selectedCurr.map((curr) => {
+      const obj = Object.create(Currency);
+      obj.id = curr.id;
+      obj.abbreviation = curr.abbreviation;
+      obj.name = curr.name;
+      obj.scale = convertedCurrencies.find(
+        (item) => item.abbreviation === obj.abbreviation,
+      ).scale;
+      obj.rate = curr.rate;
+
+      return { ...obj };
     });
 
     this.setState({
-      fixedAllCurrencies: currencies,
+      fixedAllCurrencies: [...convertedCurrencies],
+      selectedCurrencies: [...selCur],
     });
   }
 
@@ -164,28 +200,29 @@ export class MainPage extends Component {
         (curr) => curr.abbreviation === Abbreviations.USD,
       ).rate;
 
-      const bynCurrency = new Currency(
-        0,
-        Abbreviations.BYN,
-        "Белорусский рубль",
-        bynRateToUSD,
-      );
+      const bynCurrency = Object.create(Currency);
+      bynCurrency.id = 0;
+      bynCurrency.abbreviation = Abbreviations.BYN;
+      bynCurrency.name = "Белорусский рубль";
+      bynCurrency.scale = bynRateToUSD;
 
-      const defaultCurrencies = [bynCurrency];
+      const defaultCurrencies = [{ ...bynCurrency }];
 
-      currencies.forEach((currency) => {
+      const test = currencies.map((currency) => {
+        const scale = Math.trunc((bynRateToUSD / currency.rate) * 100) / 100;
+
         if (
           currency.abbreviation === Abbreviations.USD ||
           currency.abbreviation === Abbreviations.EUR ||
           currency.abbreviation === Abbreviations.RUB
         ) {
-          defaultCurrencies.push(currency);
+          defaultCurrencies.push({ ...currency, scale: scale });
         }
 
-        currency.scale = Math.trunc((bynRateToUSD / currency.rate) * 100) / 100;
+        return { ...currency, scale: scale };
       });
 
-      const sortedCurrencies = sortCurrencies([...currencies, bynCurrency]);
+      const sortedCurrencies = sortCurrencies([...test, { ...bynCurrency }]);
 
       this.setState({
         selectedCurrencies: defaultCurrencies,
